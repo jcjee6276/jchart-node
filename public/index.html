@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
+</head>
+<body>
+<h1>Stock Chart</h1>
+<canvas id="myChart" width="400" height="200"></canvas>
+<script>
+    async function fetchStockData() {
+        const response = await fetch('/api/stock-data');
+        const data = await response.json();
+        return data;
+    }
+
+    function createChart(stockData) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+
+        const chartData = stockData.map(item => ({
+            t: new Date(`${item.date}T${item.minute}:00`),
+            o: item.open,
+            h: item.high,
+            l: item.low,
+            c: item.close
+        }));
+
+        new Chart(ctx, {
+            type: 'candlestick',
+            data: {
+                datasets: [{
+                    label: 'SOXL Stock Price',
+                    data: chartData
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    fetchStockData().then(createChart);
+</script>
+</body>
+</html>
